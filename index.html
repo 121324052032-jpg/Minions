@@ -1,0 +1,192 @@
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Campus - 3D VR Navigation Portal</title>
+    <meta name="description"
+        content="Immersive 3D VR Campus Navigation built using A-Frame primitives and premium glassmorphic HUD. Explore library, science center, and recreational arenas.">
+
+    <!-- Styles & Fonts -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- A-Frame VR Framework -->
+    <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+
+    <!-- Application Logic (Deferred) -->
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+    <a-scene>
+
+        <a-sky color="purple"></a-sky>
+        <a-box position="-1 -0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
+        <a-sphere position="0 0.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
+        <a-cylinder position="1 -0.25 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+        <a-plane position="0 -1 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
+
+        <a-image src="https://raw.githubusercontent.com/alluringxstalwart/SourceYISL/main/Landscape1.png"
+            position="0 5 -10" width="25" height="7.5"></a-image>
+
+        <a-text value="Mittyverse AR VR Workshop" position="0 9.5 -10" align="center" color="white" font="mozillavr"
+            width="10" height="5" anchor="center">
+        </a-text>
+
+
+    </a-scene>
+
+    <!-- PREMIUM Glassmorphic UI Dashboard HUD -->
+    <div class="ui-container">
+
+        <!-- Header -->
+        <header class="header-bar glass-panel interactive-ui">
+            <div class="brand">
+                <div class="brand-logo">N</div>
+                <div class="brand-title">
+                    <h1>NEXUS CAMPUS</h1>
+                    <p>3D VR Navigation Portal</p>
+                </div>
+            </div>
+            <div class="header-status">
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span>PORTAL ACTIVE</span>
+                </div>
+                <button class="icon-btn" id="btn-sound" title="Toggle Sound Ambient">🔇</button>
+                <button class="icon-btn" id="btn-help" title="Navigation Help">ℹ️</button>
+            </div>
+        </header>
+
+        <!-- Main section holding Sidebar and Detail Card -->
+        <main class="main-layout">
+
+            <!-- Left Sidebar -->
+            <section class="sidebar glass-panel interactive-ui">
+                <div class="search-container">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="search-input" class="search-input"
+                        placeholder="Search facilities, services...">
+                </div>
+
+                <div class="category-tabs" id="category-tabs">
+                    <span class="category-tab active" data-category="all">All</span>
+                    <span class="category-tab" data-category="academic">Academic</span>
+                    <span class="category-tab" data-category="recreation">Recreation</span>
+                    <span class="category-tab" data-category="facility">Facilities</span>
+                </div>
+
+                <div class="location-list" id="location-list">
+                    <!-- Loaded dynamically via JS -->
+                </div>
+            </section>
+
+            <!-- Right Detail Card (Hidden initially, slides in on selection) -->
+            <section class="detail-panel glass-panel interactive-ui" id="detail-panel">
+                <div class="detail-header">
+                    <div>
+                        <span class="detail-badge" id="detail-badge">Academic</span>
+                        <h2 class="detail-title" id="detail-title">Science & Tech Center</h2>
+                        <p class="detail-subtitle" id="detail-subtitle">Innovation Quad, East Side</p>
+                    </div>
+                    <div style="font-size: 2.2rem;" id="detail-emoji-icon">🔬</div>
+                </div>
+
+                <!-- Simulation Preview Window -->
+                <div class="detail-image-container">
+                    <div class="detail-image-fallback">
+                        <span style="font-size: 2.5rem;">🌌</span>
+                        <div
+                            style="font-size: 0.75rem; color: var(--accent-cyan); font-weight: 600; letter-spacing: 2px;">
+                            LIVE 3D VIEWPORT</div>
+                        <div style="font-size: 0.65rem; color: var(--text-secondary);">ROTATING CAMERA LOCK ACTIVE</div>
+                    </div>
+                </div>
+
+                <p class="detail-desc" id="detail-desc">
+                    State-of-the-art facility featuring advanced research laboratories for robotics, biotechnology, and
+                    cybersecurity.
+                </p>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Access Hours</div>
+                        <div class="info-value" id="detail-hours">08:00 AM - 10:00 PM</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Main Services</div>
+                        <div class="info-value" id="detail-departments">Robotics & Biotech</div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="btn-glide-action">
+                        <span>🛸</span> Glide to Location
+                    </button>
+                    <button class="btn btn-secondary" id="btn-walk-action">
+                        <span>🚶</span> Teleport to Entrance
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer HUD Area -->
+        <footer class="footer-controls">
+
+            <!-- Left Side Mini Map representation -->
+            <div class="mini-map-panel glass-panel interactive-ui">
+                <div class="map-title">Central Mini-Map</div>
+                <div class="map-canvas-container">
+                    <div class="map-radar-line"></div>
+                    <div id="mini-map-dots">
+                        <!-- Plotted dynamically via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side Views Selector -->
+            <div class="sys-controls interactive-ui">
+                <button class="btn btn-secondary" id="btn-view-aerial">🌌 Orbit View</button>
+                <button class="btn btn-secondary" id="btn-view-gate">🚧 Plaza Gate</button>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Interactive Help Overlay Instructions -->
+    <div class="instructions-overlay" id="instructions-overlay">
+        <div class="instructions-card glass-panel interactive-ui">
+            <h2 class="instructions-title">Nexus Navigation Guide</h2>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 10px;">
+                Welcome to the future of campus virtual touring. Move inside the immersive environment with ease using
+                these methods:
+            </p>
+
+            <ul class="instructions-list">
+                <li>
+                    <span class="key-cap">Mouse Drag</span>
+                    <span>Click & drag the viewport to look around.</span>
+                </li>
+                <li>
+                    <span class="key-cap">W</span><span class="key-cap">A</span><span class="key-cap">S</span><span
+                        class="key-cap">D</span>
+                    <span>Keyboard buttons to walk through the campus.</span>
+                </li>
+                <li>
+                    <span class="key-cap">Left Click</span>
+                    <span>Click any building or path waypoint to navigate.</span>
+                </li>
+                <li>
+                    <span class="key-cap">HUD Menu</span>
+                    <span>Filter & click locations in the left panel to glide camera.</span>
+                </li>
+            </ul>
+
+            <button class="btn btn-primary" id="btn-close-help" style="width: 100%; margin-top: 15px;">Acknowledge &
+                Close</button>
+        </div>
+    </div>
+
+</body>
+
+</html>
