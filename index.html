@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -7,777 +8,19 @@
     <meta name="description"
         content="Explore a stunning virtual reality campus with library, science center, and recreational arenas using immersive 3D navigation." />
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script
-        src="https://unpkg.com/aframe-environment-component@1.3.3/dist/aframe-environment-component.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
-    <style>
-        *,
-        *::before,
-        *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --glass-bg: rgba(12, 12, 30, 0.45);
-            --glass-border: rgba(255, 255, 255, 0.12);
-            --glass-glow: rgba(99, 102, 241, 0.25);
-            --accent-primary: #818cf8;
-            --accent-secondary: #a78bfa;
-            --accent-warm: #f472b6;
-            --accent-teal: #2dd4bf;
-            --accent-amber: #fbbf24;
-            --text-primary: #f1f5f9;
-            --text-secondary: rgba(241, 245, 249, 0.65);
-            --text-muted: rgba(241, 245, 249, 0.4);
-            --radius-lg: 20px;
-            --radius-md: 14px;
-            --radius-sm: 10px;
-        }
-
-        body {
-            font-family: 'Inter', 'Outfit', system-ui, sans-serif;
-            background: #0a0a1a;
-            color: var(--text-primary);
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
-        }
-
-        /* ─── Loading Screen ─── */
-        #loading-screen {
-            position: fixed;
-            inset: 0;
-            z-index: 10000;
-            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #0a0a1a 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.8s ease, visibility 0.8s ease;
-        }
-
-        #loading-screen.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        .loader-orb {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, var(--accent-primary), transparent 70%),
-                radial-gradient(circle at 65% 65%, var(--accent-warm), transparent 70%);
-            animation: orbPulse 2s ease-in-out infinite, orbSpin 4s linear infinite;
-            box-shadow: 0 0 60px var(--glass-glow), 0 0 120px rgba(244, 114, 182, 0.15);
-            margin-bottom: 40px;
-        }
-
-        @keyframes orbPulse {
-
-            0%,
-            100% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.15);
-            }
-        }
-
-        @keyframes orbSpin {
-            from {
-                filter: hue-rotate(0deg);
-            }
-
-            to {
-                filter: hue-rotate(360deg);
-            }
-        }
-
-        .loader-title {
-            font-family: 'Outfit', sans-serif;
-            font-size: 2.4rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-warm), var(--accent-teal));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.5px;
-            margin-bottom: 12px;
-        }
-
-        .loader-sub {
-            font-size: 0.95rem;
-            color: var(--text-secondary);
-            font-weight: 400;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-        }
-
-        .loader-bar-wrap {
-            width: 260px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 4px;
-            margin-top: 32px;
-            overflow: hidden;
-        }
-
-        .loader-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, var(--accent-primary), var(--accent-warm));
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-
-        /* ─── HUD Overlay ─── */
-        #hud-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 100;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.6s ease 0.4s;
-        }
-
-        #hud-overlay.visible {
-            opacity: 1;
-        }
-
-        /* ─── Top Bar ─── */
-        .hud-topbar {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 12px 28px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(24px) saturate(1.4);
-            -webkit-backdrop-filter: blur(24px) saturate(1.4);
-            border: 1px solid var(--glass-border);
-            border-radius: 60px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-            pointer-events: all;
-            animation: slideDown 0.6s ease both;
-        }
-
-        @keyframes slideDown {
-            from {
-                transform: translateX(-50%) translateY(-30px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(-50%) translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .hud-logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .hud-logo-icon {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-warm));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            box-shadow: 0 4px 16px rgba(129, 140, 248, 0.35);
-        }
-
-        .hud-logo-text {
-            font-family: 'Outfit', sans-serif;
-            font-weight: 700;
-            font-size: 1.15rem;
-            background: linear-gradient(135deg, #e2e8f0, #fff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hud-divider {
-            width: 1px;
-            height: 28px;
-            background: linear-gradient(180deg, transparent, var(--glass-border), transparent);
-        }
-
-        .hud-location {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .hud-location-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--accent-teal);
-            box-shadow: 0 0 12px var(--accent-teal);
-            animation: dotPulse 2s ease-in-out infinite;
-        }
-
-        @keyframes dotPulse {
-
-            0%,
-            100% {
-                opacity: 1;
-                box-shadow: 0 0 12px var(--accent-teal);
-            }
-
-            50% {
-                opacity: 0.5;
-                box-shadow: 0 0 4px var(--accent-teal);
-            }
-        }
-
-        .hud-location-name {
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-            letter-spacing: 0.5px;
-        }
-
-        /* ─── Side Nav Panel ─── */
-        .hud-sidenav {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            pointer-events: all;
-            animation: slideRight 0.7s ease 0.2s both;
-        }
-
-        @keyframes slideRight {
-            from {
-                transform: translateY(-50%) translateX(-40px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(-50%) translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .nav-btn {
-            position: relative;
-            width: 56px;
-            height: 56px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px) saturate(1.4);
-            -webkit-backdrop-filter: blur(20px) saturate(1.4);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            font-size: 22px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-        }
-
-        .nav-btn::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-warm));
-            opacity: 0;
-            transition: opacity 0.35s ease;
-            border-radius: inherit;
-        }
-
-        .nav-btn:hover {
-            transform: scale(1.08);
-            border-color: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(129, 140, 248, 0.3);
-        }
-
-        .nav-btn:hover::before {
-            opacity: 0.2;
-        }
-
-        .nav-btn.active {
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 24px rgba(129, 140, 248, 0.4);
-        }
-
-        .nav-btn.active::before {
-            opacity: 0.25;
-        }
-
-        .nav-btn span {
-            position: relative;
-            z-index: 1;
-        }
-
-        .nav-tooltip {
-            position: absolute;
-            left: calc(100% + 14px);
-            top: 50%;
-            transform: translateY(-50%);
-            padding: 8px 16px;
-            background: rgba(15, 15, 35, 0.92);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-sm);
-            white-space: nowrap;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: var(--text-primary);
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-        }
-
-        .nav-btn:hover .nav-tooltip {
-            opacity: 1;
-            transform: translateY(-50%) translateX(4px);
-        }
-
-        /* ─── Info Panel ─── */
-        .hud-info-panel {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 320px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(28px) saturate(1.5);
-            -webkit-backdrop-filter: blur(28px) saturate(1.5);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            padding: 28px 24px;
-            pointer-events: all;
-            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-            animation: slideLeft 0.7s ease 0.3s both;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @keyframes slideLeft {
-            from {
-                transform: translateY(-50%) translateX(40px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(-50%) translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .info-header {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 20px;
-        }
-
-        .info-icon-wrap {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            transition: all 0.4s ease;
-        }
-
-        .info-title {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            transition: all 0.4s ease;
-        }
-
-        .info-subtitle {
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-top: 2px;
-        }
-
-        .info-desc {
-            font-size: 0.88rem;
-            line-height: 1.7;
-            color: var(--text-secondary);
-            margin-bottom: 22px;
-            transition: all 0.4s ease;
-        }
-
-        .info-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 22px;
-        }
-
-        .stat-card {
-            padding: 14px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: var(--radius-sm);
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            background: rgba(255, 255, 255, 0.07);
-            border-color: rgba(255, 255, 255, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .stat-value {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.25rem;
-            font-weight: 700;
-            transition: color 0.4s ease;
-        }
-
-        .stat-label {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 4px;
-        }
-
-        .info-action-btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-family: 'Inter', sans-serif;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #fff;
-            cursor: pointer;
-            transition: all 0.35s ease;
-            letter-spacing: 0.5px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .info-action-btn::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), transparent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .info-action-btn:hover::after {
-            opacity: 1;
-        }
-
-        .info-action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-        }
-
-        /* ─── Bottom Bar ─── */
-        .hud-bottombar {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            padding: 10px 24px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(24px) saturate(1.4);
-            -webkit-backdrop-filter: blur(24px) saturate(1.4);
-            border: 1px solid var(--glass-border);
-            border-radius: 60px;
-            pointer-events: all;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-            animation: slideUp 0.6s ease 0.4s both;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateX(-50%) translateY(30px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(-50%) translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .bottom-hint {
-            font-size: 0.78rem;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .hint-key {
-            padding: 3px 10px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-
-        .bottom-sep {
-            width: 1px;
-            height: 20px;
-            background: linear-gradient(180deg, transparent, var(--glass-border), transparent);
-        }
-
-        .vr-enter-btn {
-            padding: 10px 22px;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border: none;
-            border-radius: 30px;
-            color: #fff;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.82rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.35s ease;
-            box-shadow: 0 4px 16px rgba(129, 140, 248, 0.4);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .vr-enter-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 24px rgba(129, 140, 248, 0.5);
-        }
-
-        /* ─── Minimap ─── */
-        .hud-minimap {
-            position: absolute;
-            bottom: 80px;
-            right: 20px;
-            width: 180px;
-            height: 180px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px) saturate(1.4);
-            -webkit-backdrop-filter: blur(20px) saturate(1.4);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            pointer-events: all;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            animation: slideLeft 0.8s ease 0.5s both;
-        }
-
-        .minimap-label {
-            position: absolute;
-            top: 10px;
-            left: 14px;
-            font-size: 0.65rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-
-        .minimap-canvas {
-            width: 100%;
-            height: 100%;
-        }
-
-        /* ─── Responsive ─── */
-        @media (max-width: 768px) {
-            .hud-info-panel {
-                width: 260px;
-                right: 10px;
-                padding: 20px 16px;
-            }
-
-            .hud-sidenav {
-                left: 10px;
-            }
-
-            .nav-btn {
-                width: 46px;
-                height: 46px;
-                font-size: 18px;
-            }
-
-            .hud-topbar {
-                padding: 10px 20px;
-            }
-
-            .hud-minimap {
-                width: 140px;
-                height: 140px;
-                bottom: 70px;
-                right: 10px;
-            }
-
-            .hud-bottombar {
-                gap: 12px;
-                padding: 8px 16px;
-            }
-        }
-
-        /* ─── A-Frame Overrides ─── */
-        .a-enter-vr-button {
-            display: none !important;
-        }
-
-        a-scene {
-            position: fixed;
-            inset: 0;
-            z-index: 1;
-        }
-    </style>
 </head>
 
 <body>
-    <!-- ─── Loading Screen ─── -->
-    <div id="loading-screen">
-        <div class="loader-orb"></div>
-        <div class="loader-title">CampusVR</div>
-        <div class="loader-sub">Loading Virtual Campus</div>
-        <div class="loader-bar-wrap">
-            <div class="loader-bar" id="loader-bar"></div>
-        </div>
-    </div>
 
-    <!-- ─── HUD Overlay ─── -->
-    <div id="hud-overlay">
-        <!-- Top Bar -->
-        <div class="hud-topbar">
-            <div class="hud-logo">
-                <div class="hud-logo-icon">🎓</div>
-                <div class="hud-logo-text">CampusVR</div>
-            </div>
-            <div class="hud-divider"></div>
-            <div class="hud-location">
-                <div class="hud-location-dot"></div>
-                <div class="hud-location-name" id="current-location">Central Plaza</div>
-            </div>
-        </div>
-
-        <!-- Side Navigation -->
-        <div class="hud-sidenav">
-            <button class="nav-btn active" id="nav-plaza" onclick="navigateTo('plaza')" aria-label="Central Plaza">
-                <span>🏛️</span>
-                <div class="nav-tooltip">Central Plaza</div>
-            </button>
-            <button class="nav-btn" id="nav-library" onclick="navigateTo('library')" aria-label="Grand Library">
-                <span>📚</span>
-                <div class="nav-tooltip">Grand Library</div>
-            </button>
-            <button class="nav-btn" id="nav-science" onclick="navigateTo('science')" aria-label="Science Center">
-                <span>🔬</span>
-                <div class="nav-tooltip">Science Center</div>
-            </button>
-            <button class="nav-btn" id="nav-recreation" onclick="navigateTo('recreation')"
-                aria-label="Recreation Arena">
-                <span>🏟️</span>
-                <div class="nav-tooltip">Recreation Arena</div>
-            </button>
-            <button class="nav-btn" id="nav-garden" onclick="navigateTo('garden')" aria-label="Botanical Garden">
-                <span>🌿</span>
-                <div class="nav-tooltip">Botanical Garden</div>
-            </button>
-        </div>
-
-        <!-- Info Panel -->
-        <div class="hud-info-panel" id="info-panel">
-            <div class="info-header">
-                <div class="info-icon-wrap" id="info-icon"
-                    style="background: linear-gradient(135deg, rgba(129,140,248,0.2), rgba(167,139,250,0.2));">🏛️</div>
-                <div>
-                    <div class="info-title" id="info-title">Central Plaza</div>
-                    <div class="info-subtitle" id="info-subtitle">Main Campus Hub</div>
-                </div>
-            </div>
-            <div class="info-desc" id="info-desc">
-                Welcome to the heart of CampusVR. The central plaza connects all major campus buildings with elegant
-                pathways and a stunning fountain centerpiece.
-            </div>
-            <div class="info-stats" id="info-stats">
-                <div class="stat-card">
-                    <div class="stat-value" style="color: var(--accent-primary);" id="stat1-val">5</div>
-                    <div class="stat-label" id="stat1-label">Buildings</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" style="color: var(--accent-teal);" id="stat2-val">2.4k</div>
-                    <div class="stat-label" id="stat2-label">Sq. Meters</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" style="color: var(--accent-warm);" id="stat3-val">24/7</div>
-                    <div class="stat-label" id="stat3-label">Access</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" style="color: var(--accent-amber);" id="stat4-val">★ 4.9</div>
-                    <div class="stat-label" id="stat4-label">Rating</div>
-                </div>
-            </div>
-            <button class="info-action-btn" id="info-action-btn"
-                style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));"
-                onclick="teleportToLocation()">
-                ✦ Teleport Here
-            </button>
-        </div>
-
-        <!-- Minimap -->
-        <div class="hud-minimap">
-            <div class="minimap-label">Campus Map</div>
-            <canvas class="minimap-canvas" id="minimap-canvas" width="360" height="360"></canvas>
-        </div>
-
-        <!-- Bottom Bar -->
-        <div class="hud-bottombar">
-            <div class="bottom-hint">
-                <span class="hint-key">W A S D</span> Move
-            </div>
-            <div class="bottom-sep"></div>
-            <div class="bottom-hint">
-                <span class="hint-key">Mouse</span> Look
-            </div>
-            <div class="bottom-sep"></div>
-            <div class="bottom-hint">
-                <span class="hint-key">1-5</span> Teleport
-            </div>
-            <div class="bottom-sep"></div>
-            <button class="vr-enter-btn" id="vr-btn" onclick="enterVR()">
-                🥽 Enter VR
-            </button>
-        </div>
-    </div>
-
-    <!-- ─── A-Frame Scene ─── -->
-    <a-scene id="campus-scene" vr-mode-ui="enabled: false"
+    <!-- ─── A-Frame 3D Scene ─── -->
+    <a-scene id="campus-scene" vr-mode-ui="enabled: true"
         renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true; sortObjects: true"
-        fog="type: exponential; color: #1a1a3e; density: 0.012" loading-screen="enabled: false">
+        fog="type: exponential; color: #0b0f19; density: 0.008" loading-screen="enabled: false">
+
         <!-- ─── Assets ─── -->
         <a-assets>
             <img id="sky-texture"
@@ -786,26 +29,24 @@
         </a-assets>
 
         <!-- ─── Sky & Environment ─── -->
-        <a-sky src="#sky-texture" rotation="0 0 0"></a-sky>
+        <a-sky src="#sky-texture"></a-sky>
 
         <!-- Ambient & Directional Lighting -->
-        <a-entity light="type: ambient; color: #6366f1; intensity: 0.25"></a-entity>
-        <a-entity light="type: hemisphere; color: #818cf8; groundColor: #1e1b4b; intensity: 0.4"></a-entity>
-        <a-entity light="type: directional; color: #c7d2fe; intensity: 0.7" position="30 60 -20"
-            light="castShadow: true; shadowMapWidth: 2048; shadowMapHeight: 2048"></a-entity>
+        <a-entity light="type: ambient; color: #334155; intensity: 0.4"></a-entity>
+        <a-entity light="type: hemisphere; color: #818cf8; groundColor: #1e1b4b; intensity: 0.5"></a-entity>
+        <a-entity light="type: directional; color: #c7d2fe; intensity: 0.8" position="30 60 -20"></a-entity>
         <a-entity light="type: point; color: #f472b6; intensity: 0.6; distance: 80" position="-20 15 -20"></a-entity>
         <a-entity light="type: point; color: #2dd4bf; intensity: 0.5; distance: 80" position="20 15 20"></a-entity>
 
         <!-- ─── Ground Plane ─── -->
         <a-circle rotation="-90 0 0" radius="200" color="#0f1225" material="shader: flat; opacity: 0.95"></a-circle>
-        <!-- Ground details - grass-like rings -->
         <a-ring rotation="-90 0 0" position="0 0.02 0" radius-inner="0" radius-outer="120" color="#111630"
             material="shader: flat; opacity: 0.6"></a-ring>
         <a-ring rotation="-90 0 0" position="0 0.03 0" radius-inner="25" radius-outer="28" color="#1e1b4b"
             material="shader: flat; opacity: 0.5"></a-ring>
 
-        <!-- ─── Central Plaza Fountain ─── -->
-        <a-entity id="plaza-area" position="0 0 0">
+        <!-- ─── Central Courtyard & Fountain ─── -->
+        <a-entity id="fountain" position="0 0 0">
             <!-- Fountain base -->
             <a-cylinder position="0 0.4 0" radius="4.5" height="0.8" color="#1e1b4b"
                 material="metalness: 0.6; roughness: 0.3" shadow></a-cylinder>
@@ -813,28 +54,24 @@
                 material="metalness: 0.7; roughness: 0.2" shadow></a-cylinder>
             <!-- Water pool -->
             <a-cylinder position="0 0.85 0" radius="3.3" height="0.1" color="#4f46e5"
-                material="metalness: 0.9; roughness: 0.1; opacity: 0.7" class="water-shimmer"></a-cylinder>
+                material="metalness: 0.9; roughness: 0.1; opacity: 0.7"></a-cylinder>
             <!-- Fountain pillar -->
             <a-cylinder position="0 2.5 0" radius="0.4" height="3.5" color="#312e81"
                 material="metalness: 0.8; roughness: 0.2" shadow></a-cylinder>
             <a-sphere position="0 4.5 0" radius="0.7" color="#818cf8"
                 material="metalness: 0.9; roughness: 0.1; emissive: #818cf8; emissiveIntensity: 0.5"
                 animation="property: position; to: 0 4.8 0; dur: 2000; easing: easeInOutSine; loop: true; dir: alternate"></a-sphere>
-            <!-- Fountain light -->
             <a-entity light="type: point; color: #818cf8; intensity: 1.2; distance: 20" position="0 4.5 0"></a-entity>
-
-            <!-- Orbiting particles around fountain -->
+            <!-- Orbiting particles -->
             <a-sphere position="2 3 0" radius="0.12" color="#f472b6"
                 material="emissive: #f472b6; emissiveIntensity: 1; shader: flat"
-                animation="property: rotation; to: 0 360 0; dur: 5000; loop: true; easing: linear"
-                animation__orbit="property: position; to: -2 3.5 0; dur: 2500; loop: true; dir: alternate; easing: easeInOutSine"></a-sphere>
+                animation="property: position; to: -2 3.5 0; dur: 2500; loop: true; dir: alternate; easing: easeInOutSine"></a-sphere>
             <a-sphere position="-1.5 3.5 1.5" radius="0.1" color="#2dd4bf"
                 material="emissive: #2dd4bf; emissiveIntensity: 1; shader: flat"
                 animation="property: position; to: 1.5 2.5 -1.5; dur: 3000; loop: true; dir: alternate; easing: easeInOutSine"></a-sphere>
             <a-sphere position="0 5.5 0" radius="0.08" color="#fbbf24"
                 material="emissive: #fbbf24; emissiveIntensity: 1; shader: flat"
                 animation="property: position; to: 0 6 0; dur: 1500; loop: true; dir: alternate; easing: easeInOutSine"></a-sphere>
-
             <!-- Plaza floor tiles -->
             <a-ring rotation="-90 0 0" position="0 0.05 0" radius-inner="5" radius-outer="12" color="#1a1545"
                 material="shader: flat; opacity: 0.7"></a-ring>
@@ -844,37 +81,37 @@
 
         <!-- ─── Pathways ─── -->
         <!-- Path to Library (north) -->
-        <a-box position="0 0.06 -18" width="3" height="0.02" depth="25" color="#1a1545"
+        <a-box position="0 0.06 -12" width="3" height="0.02" depth="16" color="#1a1545"
             material="shader: flat; opacity: 0.6"></a-box>
-        <a-box position="0 0.07 -18" width="2.6" height="0.02" depth="25" color="#1e1b4b"
+        <a-box position="0 0.07 -12" width="2.6" height="0.02" depth="16" color="#1e1b4b"
             material="shader: flat; opacity: 0.4"></a-box>
-        <!-- Path lights to library -->
-        <a-entity class="path-light" position="-1.8 0.5 -10">
-            <a-cylinder radius="0.08" height="1" color="#312e81" material="metalness: 0.8; roughness: 0.2"></a-cylinder>
-            <a-sphere position="0 0.55 0" radius="0.15" color="#818cf8"
-                material="emissive: #818cf8; emissiveIntensity: 0.8; shader: flat"></a-sphere>
-            <a-entity light="type: point; color: #818cf8; intensity: 0.3; distance: 8" position="0 0.55 0"></a-entity>
-        </a-entity>
-        <a-entity class="path-light" position="-1.8 0.5 -16">
-            <a-cylinder radius="0.08" height="1" color="#312e81" material="metalness: 0.8; roughness: 0.2"></a-cylinder>
-            <a-sphere position="0 0.55 0" radius="0.15" color="#818cf8"
-                material="emissive: #818cf8; emissiveIntensity: 0.8; shader: flat"></a-sphere>
-            <a-entity light="type: point; color: #818cf8; intensity: 0.3; distance: 8" position="0 0.55 0"></a-entity>
-        </a-entity>
-        <a-entity class="path-light" position="-1.8 0.5 -22">
-            <a-cylinder radius="0.08" height="1" color="#312e81" material="metalness: 0.8; roughness: 0.2"></a-cylinder>
-            <a-sphere position="0 0.55 0" radius="0.15" color="#818cf8"
-                material="emissive: #818cf8; emissiveIntensity: 0.8; shader: flat"></a-sphere>
-            <a-entity light="type: point; color: #818cf8; intensity: 0.3; distance: 8" position="0 0.55 0"></a-entity>
-        </a-entity>
-
         <!-- Path to Science (east) -->
-        <a-box position="22 0.06 0" width="30" height="0.02" depth="3" color="#1a1545"
+        <a-box position="15 0.06 0" width="22" height="0.02" depth="3" color="#1a1545"
             material="shader: flat; opacity: 0.6"></a-box>
-        <a-box position="22 0.07 0" width="30" height="0.02" depth="2.6" color="#1e1b4b"
-            material="shader: flat; opacity: 0.4"></a-box>
-        <!-- Path lights to science -->
-        <a-entity class="path-light" position="10 0.5 -1.8">
+        <!-- Path to Student Center (south-west) -->
+        <a-box position="-12 0.06 12" width="3" height="0.02" depth="16" rotation="0 35 0" color="#1a1545"
+            material="shader: flat; opacity: 0.6"></a-box>
+        <!-- Path to Sports Arena (south-east) -->
+        <a-box position="15 0.06 12" width="3" height="0.02" depth="16" rotation="0 -25 0" color="#1a1545"
+            material="shader: flat; opacity: 0.6"></a-box>
+        <!-- Path to Admin (west) -->
+        <a-box position="-15 0.06 -2" width="22" height="0.02" depth="3" color="#1a1545"
+            material="shader: flat; opacity: 0.6"></a-box>
+
+        <!-- Path lights along routes -->
+        <a-entity class="path-light" position="-1.8 0.5 -8">
+            <a-cylinder radius="0.08" height="1" color="#312e81" material="metalness: 0.8; roughness: 0.2"></a-cylinder>
+            <a-sphere position="0 0.55 0" radius="0.15" color="#818cf8"
+                material="emissive: #818cf8; emissiveIntensity: 0.8; shader: flat"></a-sphere>
+            <a-entity light="type: point; color: #818cf8; intensity: 0.3; distance: 8" position="0 0.55 0"></a-entity>
+        </a-entity>
+        <a-entity class="path-light" position="-1.8 0.5 -14">
+            <a-cylinder radius="0.08" height="1" color="#312e81" material="metalness: 0.8; roughness: 0.2"></a-cylinder>
+            <a-sphere position="0 0.55 0" radius="0.15" color="#818cf8"
+                material="emissive: #818cf8; emissiveIntensity: 0.8; shader: flat"></a-sphere>
+            <a-entity light="type: point; color: #818cf8; intensity: 0.3; distance: 8" position="0 0.55 0"></a-entity>
+        </a-entity>
+        <a-entity class="path-light" position="8 0.5 -1.8">
             <a-cylinder radius="0.08" height="1" color="#312e81" material="metalness: 0.8; roughness: 0.2"></a-cylinder>
             <a-sphere position="0 0.55 0" radius="0.15" color="#2dd4bf"
                 material="emissive: #2dd4bf; emissiveIntensity: 0.8; shader: flat"></a-sphere>
@@ -886,26 +123,58 @@
                 material="emissive: #2dd4bf; emissiveIntensity: 0.8; shader: flat"></a-sphere>
             <a-entity light="type: point; color: #2dd4bf; intensity: 0.3; distance: 8" position="0 0.55 0"></a-entity>
         </a-entity>
-        <a-entity class="path-light" position="26 0.5 -1.8">
-            <a-cylinder radius="0.08" height="1" color="#312e81" material="metalness: 0.8; roughness: 0.2"></a-cylinder>
-            <a-sphere position="0 0.55 0" radius="0.15" color="#2dd4bf"
-                material="emissive: #2dd4bf; emissiveIntensity: 0.8; shader: flat"></a-sphere>
-            <a-entity light="type: point; color: #2dd4bf; intensity: 0.3; distance: 8" position="0 0.55 0"></a-entity>
+
+
+        <!-- ═══════════════════════════════════════ -->
+        <!-- ─── ADMINISTRATION HALL (West) ─── -->
+        <!-- ═══════════════════════════════════════ -->
+        <a-entity id="building-admin-hall" class="clickable" position="-25 0 -5"
+            building-interactive="locationId: admin-hall">
+            <!-- Main structure -->
+            <a-box position="0 4.5 0" width="16" height="9" depth="12" color="#2d2040"
+                material="metalness: 0.4; roughness: 0.5" shadow></a-box>
+            <!-- Pillared entrance -->
+            <a-cylinder position="-5 3.5 6.5" radius="0.45" height="7" color="#c7d2fe"
+                material="metalness: 0.7; roughness: 0.2" shadow></a-cylinder>
+            <a-cylinder position="-2.5 3.5 6.5" radius="0.45" height="7" color="#c7d2fe"
+                material="metalness: 0.7; roughness: 0.2" shadow></a-cylinder>
+            <a-cylinder position="2.5 3.5 6.5" radius="0.45" height="7" color="#c7d2fe"
+                material="metalness: 0.7; roughness: 0.2" shadow></a-cylinder>
+            <a-cylinder position="5 3.5 6.5" radius="0.45" height="7" color="#c7d2fe"
+                material="metalness: 0.7; roughness: 0.2" shadow></a-cylinder>
+            <!-- Entrance overhang -->
+            <a-box position="0 7.2 6.5" width="14" height="0.4" depth="2.5" color="#1e1b4b"
+                material="metalness: 0.6; roughness: 0.3" shadow></a-box>
+            <!-- Roof pediment -->
+            <a-cone position="0 9 0" radius-bottom="9" radius-top="0" height="2" segments-radial="4"
+                rotation="0 45 0" color="#3b2d5e" material="metalness: 0.5; roughness: 0.3" shadow></a-cone>
+            <!-- Windows (glowing panels) -->
+            <a-box position="-7 4.5 6.1" width="0.1" height="3" depth="2" color="#f59e0b"
+                material="emissive: #f59e0b; emissiveIntensity: 0.4; opacity: 0.7; shader: flat"></a-box>
+            <a-box position="7 4.5 6.1" width="0.1" height="3" depth="2" color="#f59e0b"
+                material="emissive: #f59e0b; emissiveIntensity: 0.4; opacity: 0.7; shader: flat"></a-box>
+            <a-box position="8.05 4.5 -2" width="0.1" height="2.5" depth="1.5" color="#f59e0b"
+                material="emissive: #f59e0b; emissiveIntensity: 0.3; opacity: 0.6; shader: flat"></a-box>
+            <a-box position="8.05 4.5 2" width="0.1" height="2.5" depth="1.5" color="#f59e0b"
+                material="emissive: #f59e0b; emissiveIntensity: 0.3; opacity: 0.6; shader: flat"></a-box>
+            <!-- Steps -->
+            <a-box position="0 0.15 7.5" width="12" height="0.3" depth="2" color="#1a1545" shadow></a-box>
+            <a-box position="0 0.45 8.3" width="12" height="0.3" depth="1.5" color="#1a1545" shadow></a-box>
+            <!-- Building light -->
+            <a-entity light="type: point; color: #f59e0b; intensity: 0.8; distance: 25" position="0 9 0"></a-entity>
+            <!-- Floating label (hidden by default, shown on hover) -->
+            <a-entity class="building-label" visible="false" position="0 6.5 0">
+                <a-text value="Administration Hall" align="center" color="#f8fafc" width="8"
+                    font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
+            </a-entity>
         </a-entity>
 
-        <!-- Path to Recreation (south-west) -->
-        <a-box position="-18 0.06 18" width="3" height="0.02" depth="25" rotation="0 35 0" color="#1a1545"
-            material="shader: flat; opacity: 0.6"></a-box>
-
-        <!-- Path to Garden (south-east) -->
-        <a-box position="16 0.06 20" width="3" height="0.02" depth="28" rotation="0 -25 0" color="#1a1545"
-            material="shader: flat; opacity: 0.6"></a-box>
-
 
         <!-- ═══════════════════════════════════════ -->
-        <!-- ─── GRAND LIBRARY (North) ─── -->
+        <!-- ─── CENTRAL LIBRARY (North) ─── -->
         <!-- ═══════════════════════════════════════ -->
-        <a-entity id="library-area" position="0 0 -35">
+        <a-entity id="building-library" class="clickable" position="0 0 -20"
+            building-interactive="locationId: library">
             <!-- Main structure -->
             <a-box position="0 5.5 0" width="20" height="11" depth="14" color="#1e1b4b"
                 material="metalness: 0.4; roughness: 0.5" shadow></a-box>
@@ -921,7 +190,7 @@
             <!-- Entrance overhang -->
             <a-box position="0 8.2 7.5" width="16" height="0.4" depth="3" color="#312e81"
                 material="metalness: 0.6; roughness: 0.3" shadow></a-box>
-            <!-- Triangular pediment (approximated) -->
+            <!-- Triangular pediment -->
             <a-cone position="0 9.5 7.5" radius-bottom="8.5" radius-top="0" height="3" segments-radial="4"
                 rotation="0 45 0" color="#2d2063" material="metalness: 0.5; roughness: 0.3" shadow></a-cone>
             <!-- Dome -->
@@ -931,12 +200,11 @@
                 material="emissive: #818cf8; emissiveIntensity: 0.6" shadow
                 animation="property: material.emissiveIntensity; to: 1; dur: 2000; loop: true; dir: alternate; easing: easeInOutSine"></a-sphere>
             <a-entity light="type: point; color: #818cf8; intensity: 1; distance: 30" position="0 14 0"></a-entity>
-            <!-- Windows (glowing panels) -->
+            <!-- Windows -->
             <a-box position="-8 5 7.1" width="0.1" height="3" depth="2" color="#6366f1"
                 material="emissive: #6366f1; emissiveIntensity: 0.4; opacity: 0.7; shader: flat"></a-box>
             <a-box position="8 5 7.1" width="0.1" height="3" depth="2" color="#6366f1"
                 material="emissive: #6366f1; emissiveIntensity: 0.4; opacity: 0.7; shader: flat"></a-box>
-            <!-- Side windows -->
             <a-box position="10.05 5 -2" width="0.1" height="2.5" depth="1.5" color="#818cf8"
                 material="emissive: #818cf8; emissiveIntensity: 0.3; opacity: 0.6; shader: flat"></a-box>
             <a-box position="10.05 5 2" width="0.1" height="2.5" depth="1.5" color="#818cf8"
@@ -954,13 +222,19 @@
                 material="emissive: #f472b6; emissiveIntensity: 0.8; opacity: 0.8; shader: flat"
                 animation="property: rotation; to: 0 360 10; dur: 8000; loop: true; easing: linear"
                 animation__float="property: position; to: 0 10.5 8; dur: 2000; loop: true; dir: alternate; easing: easeInOutSine"></a-box>
+            <!-- Label -->
+            <a-entity class="building-label" visible="false" position="0 6.5 0">
+                <a-text value="Central Library" align="center" color="#f8fafc" width="8"
+                    font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
+            </a-entity>
         </a-entity>
 
 
         <!-- ═══════════════════════════════════════ -->
-        <!-- ─── SCIENCE CENTER (East) ─── -->
+        <!-- ─── SCIENCE & TECH CENTER (East) ─── -->
         <!-- ═══════════════════════════════════════ -->
-        <a-entity id="science-area" position="35 0 0">
+        <a-entity id="building-science-lab" class="clickable" position="25 0 -5"
+            building-interactive="locationId: science-lab">
             <!-- Main building - modern angular design -->
             <a-box position="0 6 0" width="16" height="12" depth="18" color="#0f2a2e"
                 material="metalness: 0.6; roughness: 0.3" shadow></a-box>
@@ -997,9 +271,6 @@
             <a-sphere position="8 13.5 3.5" radius="0.35" color="#2dd4bf"
                 material="emissive: #2dd4bf; emissiveIntensity: 0.7; shader: flat"
                 animation="property: position; to: 8 14.5 3.5; dur: 3500; loop: true; dir: alternate; easing: easeInOutSine"></a-sphere>
-            <a-sphere position="6.5 14.5 2.5" radius="0.35" color="#f472b6"
-                material="emissive: #f472b6; emissiveIntensity: 0.7; shader: flat"
-                animation="property: position; to: 6.5 15.5 2.5; dur: 2800; loop: true; dir: alternate; easing: easeInOutSine"></a-sphere>
             <!-- Ground platform -->
             <a-box position="0 0.1 5" width="20" height="0.2" depth="6" color="#0d2426" shadow></a-box>
             <!-- Glowing floor panels -->
@@ -1009,13 +280,58 @@
             <a-box position="3 0.15 7" width="2" height="0.05" depth="2" color="#2dd4bf"
                 material="emissive: #2dd4bf; emissiveIntensity: 0.5; shader: flat; opacity: 0.5"
                 animation="property: material.emissiveIntensity; to: 0.2; dur: 2000; loop: true; dir: alternate"></a-box>
+            <!-- Label -->
+            <a-entity class="building-label" visible="false" position="0 6.5 0">
+                <a-text value="Science & Tech Center" align="center" color="#f8fafc" width="8"
+                    font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
+            </a-entity>
         </a-entity>
 
 
         <!-- ═══════════════════════════════════════ -->
-        <!-- ─── RECREATION ARENA (South-West) ─── -->
+        <!-- ─── STUDENT HUB & CAFÉ (South-West) ─── -->
         <!-- ═══════════════════════════════════════ -->
-        <a-entity id="recreation-area" position="-30 0 30">
+        <a-entity id="building-student-center" class="clickable" position="-20 0 20"
+            building-interactive="locationId: student-center">
+            <!-- Main structure - modern flat roof -->
+            <a-box position="0 3.5 0" width="18" height="7" depth="14" color="#2a1f1f"
+                material="metalness: 0.3; roughness: 0.6" shadow></a-box>
+            <!-- Upper floor / terrace -->
+            <a-box position="-3 7.5 0" width="12" height="1" depth="14" color="#3d2929"
+                material="metalness: 0.4; roughness: 0.5" shadow></a-box>
+            <!-- Big glass front -->
+            <a-box position="0 3.5 7.05" width="16" height="5.5" depth="0.1" color="#f59e0b"
+                material="emissive: #f59e0b; emissiveIntensity: 0.2; opacity: 0.35; shader: flat"></a-box>
+            <!-- Outdoor patio -->
+            <a-box position="5 0.1 10" width="10" height="0.2" depth="6" color="#2a2020" shadow></a-box>
+            <!-- Patio tables -->
+            <a-cylinder position="3 0.8 10" radius="0.6" height="0.06" color="#4a3a3a" shadow></a-cylinder>
+            <a-cylinder position="3 0.4 10" radius="0.08" height="0.7" color="#4a3a3a"></a-cylinder>
+            <a-cylinder position="7 0.8 10" radius="0.6" height="0.06" color="#4a3a3a" shadow></a-cylinder>
+            <a-cylinder position="7 0.4 10" radius="0.08" height="0.7" color="#4a3a3a"></a-cylinder>
+            <!-- Neon sign light -->
+            <a-box position="0 6.5 7.1" width="6" height="0.5" depth="0.1" color="#10b981"
+                material="emissive: #10b981; emissiveIntensity: 0.8; shader: flat"
+                animation="property: material.emissiveIntensity; to: 0.4; dur: 2000; loop: true; dir: alternate"></a-box>
+            <a-entity light="type: point; color: #10b981; intensity: 1; distance: 20" position="0 7 8"></a-entity>
+            <!-- Steps -->
+            <a-box position="0 0.15 7.5" width="8" height="0.3" depth="1.5" color="#1a1515" shadow></a-box>
+            <!-- Cafe awning -->
+            <a-box position="5 3.2 8" width="10" height="0.1" depth="3" color="#ef4444"
+                material="opacity: 0.7" shadow></a-box>
+            <!-- Label -->
+            <a-entity class="building-label" visible="false" position="0 6.5 0">
+                <a-text value="Student Hub & Cafe" align="center" color="#f8fafc" width="8"
+                    font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
+            </a-entity>
+        </a-entity>
+
+
+        <!-- ═══════════════════════════════════════ -->
+        <!-- ─── SPORTS ARENA (South-East) ─── -->
+        <!-- ═══════════════════════════════════════ -->
+        <a-entity id="building-sports-arena" class="clickable" position="25 0 20"
+            building-interactive="locationId: sports-arena">
             <!-- Main arena - curved structure -->
             <a-cylinder position="0 5 0" radius="14" height="10" open-ended="false" theta-length="270" theta-start="45"
                 color="#2a1a1a" material="metalness: 0.4; roughness: 0.5; side: double" shadow></a-cylinder>
@@ -1047,13 +363,6 @@
                 <a-entity light="type: spot; color: #fbbf24; intensity: 2; distance: 50; angle: 45; penumbra: 0.3"
                     position="0 6 2" rotation="-30 0 0"></a-entity>
             </a-entity>
-            <a-entity position="0 12 12">
-                <a-cylinder radius="0.2" height="12" color="#4a3030"
-                    material="metalness: 0.7; roughness: 0.3"></a-cylinder>
-                <a-box position="0 6.5 -1" width="3" height="1" depth="1.5" color="#4a3030" shadow></a-box>
-                <a-entity light="type: spot; color: #fbbf24; intensity: 2; distance: 50; angle: 45; penumbra: 0.3"
-                    position="0 6 -2" rotation="-30 180 0"></a-entity>
-            </a-entity>
             <!-- Scoreboard -->
             <a-box position="0 10 -14.5" width="8" height="4" depth="0.3" color="#1a1a1a" shadow></a-box>
             <a-box position="0 10 -14.3" width="7.2" height="3.2" depth="0.1" color="#f472b6"
@@ -1065,81 +374,11 @@
                 animation="property: rotation; to: 0 360 0; dur: 4000; loop: true; easing: linear"
                 animation__float="property: position; to: 0 14.8 0; dur: 2000; loop: true; dir: alternate; easing: easeInOutSine"></a-cone>
             <a-entity light="type: point; color: #fbbf24; intensity: 1; distance: 20" position="0 14 0"></a-entity>
-        </a-entity>
-
-
-        <!-- ═══════════════════════════════════════ -->
-        <!-- ─── BOTANICAL GARDEN (South-East) ─── -->
-        <!-- ═══════════════════════════════════════ -->
-        <a-entity id="garden-area" position="28 0 35">
-            <!-- Garden ground -->
-            <a-circle position="0 0.05 0" radius="18" rotation="-90 0 0" color="#0d1f12"
-                material="shader: flat; opacity: 0.7"></a-circle>
-            <!-- Pond -->
-            <a-circle position="-4 0.08 3" radius="4" rotation="-90 0 0" color="#1a3a5e"
-                material="shader: flat; opacity: 0.6"></a-circle>
-            <a-circle position="-4 0.09 3" radius="3.5" rotation="-90 0 0" color="#2563eb"
-                material="shader: flat; opacity: 0.4"></a-circle>
-            <a-entity light="type: point; color: #60a5fa; intensity: 0.5; distance: 10" position="-4 0.5 3"></a-entity>
-            <!-- Greenhouse dome -->
-            <a-sphere position="6 4 -5" radius="6" theta-length="90" color="#166534"
-                material="metalness: 0.3; roughness: 0.4; opacity: 0.5; side: double" shadow></a-sphere>
-            <a-cylinder position="6 0.1 -5" radius="6" height="0.2" color="#14532d" shadow></a-cylinder>
-            <a-entity light="type: point; color: #4ade80; intensity: 0.8; distance: 15" position="6 3 -5"></a-entity>
-            <!-- Trees (stylized) -->
-            <!-- Tree 1 -->
-            <a-cylinder position="-8 2 -3" radius="0.3" height="4" color="#3a2a1a"
-                material="metalness: 0.2; roughness: 0.8" shadow></a-cylinder>
-            <a-sphere position="-8 5 -3" radius="2" color="#166534" material="roughness: 0.7" shadow></a-sphere>
-            <!-- Tree 2 -->
-            <a-cylinder position="-12 2.5 2" radius="0.35" height="5" color="#3a2a1a"
-                material="metalness: 0.2; roughness: 0.8" shadow></a-cylinder>
-            <a-sphere position="-12 6 2" radius="2.5" color="#15803d" material="roughness: 0.7" shadow></a-sphere>
-            <!-- Tree 3 -->
-            <a-cylinder position="0 1.5 8" radius="0.25" height="3" color="#3a2a1a"
-                material="metalness: 0.2; roughness: 0.8" shadow></a-cylinder>
-            <a-cone position="0 4 8" radius-bottom="2" radius-top="0" height="4" color="#166534"
-                material="roughness: 0.6" shadow></a-cone>
-            <!-- Tree 4 -->
-            <a-cylinder position="10 2 6" radius="0.3" height="4" color="#3a2a1a"
-                material="metalness: 0.2; roughness: 0.8" shadow></a-cylinder>
-            <a-sphere position="10 5 6" radius="2.2" color="#22863a" material="roughness: 0.7" shadow></a-sphere>
-            <!-- Tree 5 -->
-            <a-cylinder position="-5 2 10" radius="0.25" height="4" color="#3a2a1a"
-                material="metalness: 0.2; roughness: 0.8" shadow></a-cylinder>
-            <a-cone position="-5 5 10" radius-bottom="1.8" radius-top="0" height="4" color="#14532d"
-                material="roughness: 0.6" shadow></a-cone>
-            <!-- Flower beds -->
-            <a-cylinder position="3 0.2 5" radius="1.5" height="0.3" color="#1a0a0a" shadow></a-cylinder>
-            <a-sphere position="2.5 0.8 5" radius="0.3" color="#f472b6"
-                material="emissive: #f472b6; emissiveIntensity: 0.4; shader: flat"></a-sphere>
-            <a-sphere position="3.5 0.7 5.3" radius="0.25" color="#fb923c"
-                material="emissive: #fb923c; emissiveIntensity: 0.4; shader: flat"></a-sphere>
-            <a-sphere position="3 0.75 4.5" radius="0.28" color="#a78bfa"
-                material="emissive: #a78bfa; emissiveIntensity: 0.4; shader: flat"></a-sphere>
-            <!-- Fireflies -->
-            <a-sphere position="-6 2 6" radius="0.06" color="#fbbf24"
-                material="emissive: #fbbf24; emissiveIntensity: 1; shader: flat"
-                animation="property: position; to: -4 3 8; dur: 5000; loop: true; dir: alternate; easing: easeInOutSine"
-                animation__blink="property: material.opacity; to: 0.2; dur: 1200; loop: true; dir: alternate"></a-sphere>
-            <a-sphere position="2 1.5 10" radius="0.06" color="#fbbf24"
-                material="emissive: #fbbf24; emissiveIntensity: 1; shader: flat"
-                animation="property: position; to: 4 2.5 8; dur: 6000; loop: true; dir: alternate; easing: easeInOutSine"
-                animation__blink="property: material.opacity; to: 0.2; dur: 1500; loop: true; dir: alternate"></a-sphere>
-            <a-sphere position="-10 1.8 -2" radius="0.06" color="#4ade80"
-                material="emissive: #4ade80; emissiveIntensity: 1; shader: flat"
-                animation="property: position; to: -8 2.8 0; dur: 4500; loop: true; dir: alternate; easing: easeInOutSine"
-                animation__blink="property: material.opacity; to: 0.2; dur: 1000; loop: true; dir: alternate"></a-sphere>
-            <!-- Garden bench -->
-            <a-box position="8 0.4 10" width="2.5" height="0.15" depth="0.7" color="#5c3a1a" shadow></a-box>
-            <a-box position="8 0.2 10" width="0.15" height="0.4" depth="0.6" color="#5c3a1a" shadow></a-box>
-            <a-box position="9.1 0.2 10" width="0.15" height="0.4" depth="0.6" color="#5c3a1a" shadow></a-box>
-            <a-box position="6.9 0.2 10" width="0.15" height="0.4" depth="0.6" color="#5c3a1a" shadow></a-box>
-            <a-box position="8 0.7 9.6" width="2.5" height="0.8" depth="0.1" color="#5c3a1a" shadow
-                rotation="-10 0 0"></a-box>
-            <!-- Garden arch -->
-            <a-torus position="-2 3 -8" radius="3" radius-tubular="0.12" arc="180" color="#7c6a4a"
-                material="metalness: 0.5; roughness: 0.4" rotation="0 90 0" shadow></a-torus>
+            <!-- Label -->
+            <a-entity class="building-label" visible="false" position="0 6.5 0">
+                <a-text value="Sports Arena" align="center" color="#f8fafc" width="8"
+                    font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
+            </a-entity>
         </a-entity>
 
 
@@ -1173,6 +412,24 @@
                 shadow></a-cylinder>
             <a-sphere position="0 3.2 0" radius="2" color="#22863a" material="roughness: 0.7" shadow></a-sphere>
         </a-entity>
+        <!-- More trees near buildings -->
+        <a-entity position="-30 0 8">
+            <a-cylinder radius="0.3" height="4" color="#3a2a1a" material="metalness: 0.2; roughness: 0.8"
+                shadow></a-cylinder>
+            <a-sphere position="0 3.5 0" radius="2" color="#15803d" material="roughness: 0.7" shadow></a-sphere>
+        </a-entity>
+        <a-entity position="15 0 15">
+            <a-cylinder radius="0.25" height="3" color="#3a2a1a" material="metalness: 0.2; roughness: 0.8"
+                shadow></a-cylinder>
+            <a-cone position="0 2.8 0" radius-bottom="1.6" radius-top="0" height="3" color="#166534"
+                material="roughness: 0.6" shadow></a-cone>
+        </a-entity>
+        <a-entity position="-12 0 15">
+            <a-cylinder radius="0.22" height="3.5" color="#3a2a1a" material="metalness: 0.2; roughness: 0.8"
+                shadow></a-cylinder>
+            <a-sphere position="0 3 0" radius="1.8" color="#22863a" material="roughness: 0.7" shadow></a-sphere>
+        </a-entity>
+
         <!-- Benches near plaza -->
         <a-entity position="6 0 6">
             <a-box width="2" height="0.12" depth="0.6" position="0 0.4 0" color="#5c3a1a" shadow></a-box>
@@ -1184,6 +441,7 @@
             <a-box width="0.12" height="0.4" depth="0.5" position="-0.9 0.2 0" color="#5c3a1a" shadow></a-box>
             <a-box width="0.12" height="0.4" depth="0.5" position="0.9 0.2 0" color="#5c3a1a" shadow></a-box>
         </a-entity>
+
         <!-- Lamp posts -->
         <a-entity position="14 0 -12">
             <a-cylinder radius="0.08" height="4" color="#312e81"></a-cylinder>
@@ -1192,6 +450,12 @@
             <a-entity light="type: point; color: #fbbf24; intensity: 0.4; distance: 12" position="0 2.2 0"></a-entity>
         </a-entity>
         <a-entity position="-14 0 12">
+            <a-cylinder radius="0.08" height="4" color="#312e81"></a-cylinder>
+            <a-sphere position="0 2.2 0" radius="0.2" color="#fbbf24"
+                material="emissive: #fbbf24; emissiveIntensity: 0.6; shader: flat"></a-sphere>
+            <a-entity light="type: point; color: #fbbf24; intensity: 0.4; distance: 12" position="0 2.2 0"></a-entity>
+        </a-entity>
+        <a-entity position="0 0 10">
             <a-cylinder radius="0.08" height="4" color="#312e81"></a-cylinder>
             <a-sphere position="0 2.2 0" radius="0.2" color="#fbbf24"
                 material="emissive: #fbbf24; emissiveIntensity: 0.6; shader: flat"></a-sphere>
@@ -1231,384 +495,134 @@
             animation="property: material.opacity; to: 0.2; dur: 2400; loop: true; dir: alternate"></a-sphere>
 
         <!-- ─── Camera Rig ─── -->
-        <a-entity id="camera-rig" position="0 0 14" rotation="0 0 0" movement-controls="speed: 0.15; fly: false"
-            wasd-controls="acceleration: 40">
-            <a-entity camera look-controls="pointerLockEnabled: true" position="0 1.6 0" id="main-camera">
-                <a-cursor color="#818cf8" fuse="false" raycaster="objects: .clickable" opacity="0.6"
-                    animation__scale="property: scale; to: 1.5 1.5 1.5; dur: 200; startEvents: mouseenter"
-                    animation__scaledown="property: scale; to: 1 1 1; dur: 200; startEvents: mouseleave">
-                </a-cursor>
+        <a-entity id="camera-rig" position="0 35 45" rotation="-40 0 0" camera-glide>
+            <a-entity id="main-camera" camera look-controls="pointerLockEnabled: false">
+                <a-cursor color="#06b6d4" fuse="false" raycaster="objects: .clickable" opacity="0.6"></a-cursor>
             </a-entity>
         </a-entity>
     </a-scene>
 
 
-    <!-- ═══════════════════════════════════════ -->
-    <!-- ─── JavaScript ─── -->
-    <!-- ═══════════════════════════════════════ -->
-    <script>
-        // ─── Location Data ───
-        const locations = {
-            plaza: {
-                name: 'Central Plaza',
-                subtitle: 'Main Campus Hub',
-                icon: '🏛️',
-                desc: 'Welcome to the heart of CampusVR. The central plaza connects all major campus buildings with elegant pathways and a stunning fountain centerpiece.',
-                position: { x: 0, y: 0, z: 14 },
-                lookAt: { x: 0, y: 0, z: 0 },
-                color: { primary: '#818cf8', secondary: '#a78bfa' },
-                stats: [
-                    { value: '5', label: 'Buildings' },
-                    { value: '2.4k', label: 'Sq. Meters' },
-                    { value: '24/7', label: 'Access' },
-                    { value: '★ 4.9', label: 'Rating' }
-                ]
-            },
-            library: {
-                name: 'Grand Library',
-                subtitle: 'Knowledge Nexus',
-                icon: '📚',
-                desc: 'A neoclassical masterpiece housing over 2 million volumes. Features a spectacular domed reading hall, rare manuscripts archive, and immersive digital study pods.',
-                position: { x: 0, y: 0, z: -20 },
-                lookAt: { x: 0, y: 5, z: -35 },
-                color: { primary: '#818cf8', secondary: '#6366f1' },
-                stats: [
-                    { value: '2M+', label: 'Volumes' },
-                    { value: '500', label: 'Seats' },
-                    { value: '4', label: 'Floors' },
-                    { value: '★ 4.8', label: 'Rating' }
-                ]
-            },
-            science: {
-                name: 'Science Center',
-                subtitle: 'Innovation Hub',
-                icon: '🔬',
-                desc: 'A cutting-edge research facility with quantum computing labs, biotech cleanrooms, and an observatory tower. Pushing the boundaries of human knowledge every day.',
-                position: { x: 22, y: 0, z: 0 },
-                lookAt: { x: 35, y: 6, z: 0 },
-                color: { primary: '#2dd4bf', secondary: '#14b8a6' },
-                stats: [
-                    { value: '12', label: 'Labs' },
-                    { value: '300+', label: 'Researchers' },
-                    { value: '50+', label: 'Projects' },
-                    { value: '★ 4.9', label: 'Rating' }
-                ]
-            },
-            recreation: {
-                name: 'Recreation Arena',
-                subtitle: 'Athletic Complex',
-                icon: '🏟️',
-                desc: 'A world-class multi-sport arena with a 5,000-seat stadium, Olympic swimming pool, indoor courts, and state-of-the-art fitness center. Home to championship teams.',
-                position: { x: -18, y: 0, z: 18 },
-                lookAt: { x: -30, y: 5, z: 30 },
-                color: { primary: '#f472b6', secondary: '#ec4899' },
-                stats: [
-                    { value: '5k', label: 'Seats' },
-                    { value: '8', label: 'Sports' },
-                    { value: '3', label: 'Pools' },
-                    { value: '★ 4.7', label: 'Rating' }
-                ]
-            },
-            garden: {
-                name: 'Botanical Garden',
-                subtitle: 'Nature Sanctuary',
-                icon: '🌿',
-                desc: 'A serene oasis featuring rare plant species from six continents, a butterfly conservatory, zen meditation gardens, and a crystal-clear reflection pond.',
-                position: { x: 16, y: 0, z: 22 },
-                lookAt: { x: 28, y: 3, z: 35 },
-                color: { primary: '#4ade80', secondary: '#22c55e' },
-                stats: [
-                    { value: '800+', label: 'Species' },
-                    { value: '5', label: 'Biomes' },
-                    { value: '2 ha', label: 'Area' },
-                    { value: '★ 4.9', label: 'Rating' }
-                ]
-            }
-        };
+    <!-- ─── HTML UI Overlay ─── -->
+    <div class="ui-container">
 
-        let currentLocation = 'plaza';
-        let isAnimating = false;
+        <!-- Header Bar -->
+        <div class="header-bar glass-panel interactive-ui">
+            <div class="brand">
+                <div class="brand-logo">🏫</div>
+                <div class="brand-title">
+                    <h1>CampusVR</h1>
+                    <p>Virtual Navigator</p>
+                </div>
+            </div>
+            <div class="header-status">
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span>Scene Active</span>
+                </div>
+            </div>
+        </div>
 
-        // ─── Loading ───
-        function simulateLoading() {
-            const bar = document.getElementById('loader-bar');
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += Math.random() * 15 + 5;
-                if (progress >= 100) {
-                    progress = 100;
-                    clearInterval(interval);
-                    setTimeout(() => {
-                        document.getElementById('loading-screen').classList.add('hidden');
-                        document.getElementById('hud-overlay').classList.add('visible');
-                        drawMinimap();
-                    }, 400);
-                }
-                bar.style.width = progress + '%';
-            }, 200);
-        }
+        <!-- Main Layout (Sidebar + Detail Panel) -->
+        <div class="main-layout">
 
-        // Wait for A-Frame scene to load
-        const scene = document.querySelector('a-scene');
-        if (scene.hasLoaded) {
-            simulateLoading();
-        } else {
-            scene.addEventListener('loaded', simulateLoading);
-        }
+            <!-- Sidebar: Location Directory -->
+            <div class="sidebar glass-panel interactive-ui">
+                <div class="search-container">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" id="search-input" placeholder="Search buildings..." />
+                </div>
 
-        // ─── Navigation ───
-        function navigateTo(locationId) {
-            if (isAnimating || locationId === currentLocation) return;
+                <div class="category-tabs" id="category-tabs">
+                    <button class="category-tab active" data-category="all">All</button>
+                    <button class="category-tab" data-category="academic">Academic</button>
+                    <button class="category-tab" data-category="recreation">Recreation</button>
+                    <button class="category-tab" data-category="facility">Facility</button>
+                </div>
 
-            const loc = locations[locationId];
-            if (!loc) return;
+                <div class="location-list" id="location-list">
+                    <!-- Populated by script.js -->
+                </div>
+            </div>
 
-            // Update active button
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('nav-' + locationId).classList.add('active');
+            <!-- Detail Panel (shown on location select) -->
+            <div class="detail-panel glass-panel interactive-ui" id="detail-panel">
+                <div class="detail-header">
+                    <div>
+                        <span class="detail-badge" id="detail-badge">academic</span>
+                        <div class="detail-title" id="detail-title">Building Name</div>
+                        <div class="detail-subtitle" id="detail-subtitle">Subtitle</div>
+                    </div>
+                </div>
 
-            // Update info panel
-            updateInfoPanel(loc);
+                <div class="detail-image-container">
+                    <div class="detail-image-fallback">
+                        <span id="detail-emoji-icon">🏛️</span>
+                        <span style="font-size: 0.75rem; color: var(--text-secondary);">3D Preview</span>
+                    </div>
+                </div>
 
-            // Update location display
-            document.getElementById('current-location').textContent = loc.name;
+                <div class="detail-desc" id="detail-desc">Description goes here.</div>
 
-            currentLocation = locationId;
-            drawMinimap();
-        }
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Hours</div>
+                        <div class="info-value" id="detail-hours">—</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Departments</div>
+                        <div class="info-value" id="detail-departments">—</div>
+                    </div>
+                </div>
 
-        function updateInfoPanel(loc) {
-            const panel = document.getElementById('info-panel');
-            panel.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-            panel.style.opacity = '0';
-            panel.style.transform = 'translateY(-50%) translateX(20px)';
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="btn-glide-action">✦ Fly to Building</button>
+                    <button class="btn btn-secondary" id="btn-walk-action">🚶 Walk There</button>
+                </div>
+            </div>
+        </div>
 
-            setTimeout(() => {
-                document.getElementById('info-icon').textContent = '';
-                document.getElementById('info-icon').innerHTML = loc.icon;
-                document.getElementById('info-icon').style.background =
-                    `linear-gradient(135deg, ${loc.color.primary}33, ${loc.color.secondary}33)`;
-                document.getElementById('info-title').textContent = loc.name;
-                document.getElementById('info-subtitle').textContent = loc.subtitle;
-                document.getElementById('info-desc').textContent = loc.desc;
+        <!-- Footer Controls -->
+        <div class="footer-controls">
 
-                const statColors = [loc.color.primary, '#2dd4bf', '#f472b6', '#fbbf24'];
-                loc.stats.forEach((stat, i) => {
-                    document.getElementById('stat' + (i + 1) + '-val').textContent = stat.value;
-                    document.getElementById('stat' + (i + 1) + '-val').style.color = statColors[i];
-                    document.getElementById('stat' + (i + 1) + '-label').textContent = stat.label;
-                });
+            <!-- Mini Map -->
+            <div class="mini-map-panel glass-panel interactive-ui">
+                <div class="map-title">Campus Map</div>
+                <div class="map-canvas-container">
+                    <div class="map-radar-line"></div>
+                    <div id="mini-map-dots">
+                        <!-- Populated by script.js -->
+                    </div>
+                </div>
+            </div>
 
-                const btn = document.getElementById('info-action-btn');
-                btn.style.background = `linear-gradient(135deg, ${loc.color.primary}, ${loc.color.secondary})`;
-                btn.style.boxShadow = `0 4px 20px ${loc.color.primary}66`;
+            <!-- System Controls -->
+            <div class="sys-controls interactive-ui">
+                <button class="icon-btn" id="btn-view-aerial" title="Aerial View">🛩️</button>
+                <button class="icon-btn" id="btn-view-gate" title="Gate View">🚪</button>
+                <button class="icon-btn" id="btn-sound" title="Toggle Sound">🔇</button>
+                <button class="icon-btn" id="btn-help" title="Help">❓</button>
+            </div>
+        </div>
+    </div>
 
-                panel.style.opacity = '1';
-                panel.style.transform = 'translateY(-50%) translateX(0)';
-            }, 300);
-        }
+    <!-- Instructions Overlay -->
+    <div class="instructions-overlay" id="instructions-overlay">
+        <div class="instructions-card glass-panel">
+            <div class="instructions-title">🎓 CampusVR Navigation</div>
+            <ul class="instructions-list">
+                <li><span class="key-cap">Click</span> Select a building from the sidebar or 3D scene</li>
+                <li><span class="key-cap">Mouse</span> Click and drag to rotate the camera view</li>
+                <li><span class="key-cap">Scroll</span> Zoom in and out of the campus</li>
+                <li><span class="key-cap">✦ Fly</span> Smoothly glide camera to a building</li>
+                <li><span class="key-cap">🚶 Walk</span> Teleport to ground level near a building</li>
+                <li><span class="key-cap">🛩️</span> Reset to aerial overview</li>
+            </ul>
+            <button class="btn btn-primary" id="btn-close-help">Got It!</button>
+        </div>
+    </div>
 
-        function teleportToLocation() {
-            if (isAnimating) return;
-            isAnimating = true;
-
-            const loc = locations[currentLocation];
-            const rig = document.getElementById('camera-rig');
-
-            // Flash effect
-            const flash = document.createElement('div');
-            flash.style.cssText = `
-        position: fixed; inset: 0; z-index: 99;
-        background: radial-gradient(circle, ${loc.color.primary}88, transparent);
-        pointer-events: none; opacity: 0;
-        transition: opacity 0.3s ease;
-      `;
-            document.body.appendChild(flash);
-
-            requestAnimationFrame(() => {
-                flash.style.opacity = '1';
-                setTimeout(() => {
-                    rig.setAttribute('position', `${loc.position.x} ${loc.position.y} ${loc.position.z}`);
-                    flash.style.opacity = '0';
-                    setTimeout(() => {
-                        flash.remove();
-                        isAnimating = false;
-                    }, 400);
-                }, 350);
-            });
-
-            drawMinimap();
-        }
-
-        // ─── Keyboard Shortcuts ───
-        document.addEventListener('keydown', (e) => {
-            const keyMap = { '1': 'plaza', '2': 'library', '3': 'science', '4': 'recreation', '5': 'garden' };
-            if (keyMap[e.key]) {
-                navigateTo(keyMap[e.key]);
-                teleportToLocation();
-            }
-        });
-
-        // ─── Enter VR ───
-        function enterVR() {
-            const scene = document.querySelector('a-scene');
-            if (scene.is('vr-mode')) {
-                scene.exitVR();
-            } else {
-                scene.enterVR();
-            }
-        }
-
-        // ─── Minimap ───
-        function drawMinimap() {
-            const canvas = document.getElementById('minimap-canvas');
-            const ctx = canvas.getContext('2d');
-            const w = canvas.width;
-            const h = canvas.height;
-
-            ctx.clearRect(0, 0, w, h);
-
-            // Background
-            ctx.fillStyle = 'rgba(10, 10, 30, 0.6)';
-            ctx.fillRect(0, 0, w, h);
-
-            // Grid lines
-            ctx.strokeStyle = 'rgba(129, 140, 248, 0.08)';
-            ctx.lineWidth = 0.5;
-            for (let i = 0; i < w; i += 30) {
-                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, h); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(w, i); ctx.stroke();
-            }
-
-            const cx = w / 2;
-            const cy = h / 2;
-            const scale = 3;
-
-            // Draw paths
-            ctx.strokeStyle = 'rgba(129, 140, 248, 0.15)';
-            ctx.lineWidth = 2;
-
-            const drawPath = (x1, y1, x2, y2) => {
-                ctx.beginPath();
-                ctx.moveTo(cx + x1 * scale, cy + y1 * scale);
-                ctx.lineTo(cx + x2 * scale, cy + y2 * scale);
-                ctx.stroke();
-            };
-
-            drawPath(0, 0, 0, -35);
-            drawPath(0, 0, 35, 0);
-            drawPath(0, 0, -30, 30);
-            drawPath(0, 0, 28, 35);
-
-            // Draw locations
-            const locPositions = {
-                plaza: { x: 0, z: 0 },
-                library: { x: 0, z: -35 },
-                science: { x: 35, z: 0 },
-                recreation: { x: -30, z: 30 },
-                garden: { x: 28, z: 35 }
-            };
-
-            Object.entries(locPositions).forEach(([id, pos]) => {
-                const sx = cx + pos.x * scale;
-                const sy = cy + pos.z * scale;
-                const loc = locations[id];
-                const isActive = id === currentLocation;
-
-                // Glow
-                if (isActive) {
-                    const gradient = ctx.createRadialGradient(sx, sy, 0, sx, sy, 18);
-                    gradient.addColorStop(0, loc.color.primary + '66');
-                    gradient.addColorStop(1, 'transparent');
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(sx - 20, sy - 20, 40, 40);
-                }
-
-                // Dot
-                ctx.beginPath();
-                ctx.arc(sx, sy, isActive ? 6 : 4, 0, Math.PI * 2);
-                ctx.fillStyle = isActive ? loc.color.primary : 'rgba(129, 140, 248, 0.4)';
-                ctx.fill();
-
-                if (isActive) {
-                    ctx.beginPath();
-                    ctx.arc(sx, sy, 10, 0, Math.PI * 2);
-                    ctx.strokeStyle = loc.color.primary + '66';
-                    ctx.lineWidth = 1.5;
-                    ctx.stroke();
-                }
-
-                // Label
-                ctx.fillStyle = isActive ? '#f1f5f9' : 'rgba(241, 245, 249, 0.4)';
-                ctx.font = `${isActive ? '600' : '400'} ${isActive ? '10' : '8'}px Inter, sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.fillText(loc.name.split(' ')[0], sx, sy + (isActive ? 20 : 14));
-            });
-
-            // Player indicator
-            const rig = document.getElementById('camera-rig');
-            if (rig) {
-                const pos = rig.getAttribute('position');
-                const px = cx + pos.x * scale;
-                const py = cy + pos.z * scale;
-
-                // Player glow
-                const pGrad = ctx.createRadialGradient(px, py, 0, px, py, 10);
-                pGrad.addColorStop(0, '#f472b688');
-                pGrad.addColorStop(1, 'transparent');
-                ctx.fillStyle = pGrad;
-                ctx.fillRect(px - 12, py - 12, 24, 24);
-
-                // Player dot
-                ctx.beginPath();
-                ctx.arc(px, py, 4, 0, Math.PI * 2);
-                ctx.fillStyle = '#f472b6';
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(px, py, 7, 0, Math.PI * 2);
-                ctx.strokeStyle = '#f472b688';
-                ctx.lineWidth = 1;
-                ctx.stroke();
-            }
-        }
-
-        // Update minimap periodically
-        setInterval(drawMinimap, 500);
-
-        // ─── Proximity Detection ───
-        function checkProximity() {
-            const rig = document.getElementById('camera-rig');
-            if (!rig) return;
-            const pos = rig.getAttribute('position');
-
-            const locPositions = {
-                plaza: { x: 0, z: 0 },
-                library: { x: 0, z: -35 },
-                science: { x: 35, z: 0 },
-                recreation: { x: -30, z: 30 },
-                garden: { x: 28, z: 35 }
-            };
-
-            let closestId = 'plaza';
-            let closestDist = Infinity;
-
-            Object.entries(locPositions).forEach(([id, lPos]) => {
-                const dist = Math.sqrt(
-                    Math.pow(pos.x - lPos.x, 2) + Math.pow(pos.z - lPos.z, 2)
-                );
-                if (dist < closestDist) {
-                    closestDist = dist;
-                    closestId = id;
-                }
-            });
-
-            if (closestId !== currentLocation && closestDist < 20) {
-                navigateTo(closestId);
-            }
-        }
-
-        setInterval(checkProximity, 1000);
-    </script>
+    <script src="script.js"></script>
 </body>
 
 </html>
